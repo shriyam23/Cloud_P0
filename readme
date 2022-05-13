@@ -1,0 +1,37 @@
+Pre-processing and analyzing real-world dataset in order to understand the trends n an hour's worth of Wikipedia traffic log
+
+Wikimedia maintains hourly pageview statistics for all objects stored on Wikimedia servers as publicly accessible datasets. 
+We will use these statistics to analyze pageview trends and derive the trending topics on Wikipedia for a particular time range.
+Logs are stored with public access every hour in flat files of text. Each line of a file corresponds to pageviews upon one single 
+wiki page on the Wikimedia servers.
+
+Each line in the pageview files has 4 space-separated fields:
+domain_code page_title count_views total_response_size
+domain_code has two parts, a language identifier and the abbreviation of the sub-project suffix of the domain name.
+The subproject suffix of the domain name (domain trailing part) is coded as an abbreviation, for example, .wikibooks.org
+is coded as .b and .mediawiki.org is coded as .w. The only exception is that project .wikipedia.org is indicated by the 
+absence of any abbreviation, for example, en.wikipedia.org will be coded as en.
+
+In this project we focused on data from .wikipedia.org in English, which has the exact domain code: en and used the first
+hour of March 8, 2018, as we are beginning our process of Wikipedia information exploration, during which certain special events occurred.
+
+Data source: 
+https://clouddeveloper.blob.core.windows.net/datasets/sequential-analysis/wikipediatraf/2018-march-madness/pageviews-20180310-000000.gz
+
+Filtering rules:
+  -URL normalization and percent-encoding: According to RFC 3986, URLs are normalized and special characters were converted by percent-encoding.
+  -Although % percent-encoded titles are expected in URLs, decoded titles are expected in pageview logs. Due to arbitrary user behavior and 
+  third-party usage, various titles pointing to the same page still exist for some pages, such as Special%3ASearch and Special:Search.
+  As a result, I mapped all these titles to the same original title Special:Search by making use of percent decoding.
+  -Handle dirty data: After applying percent decoding, I split the record into columns and filtered out the lines that don't have the four columns
+  as expected.
+  -Desktop/mobile Wikipedia sites: I focused on English Desktop/Mobile Wikipedia pages, keeping the rows only if the first column is exactly 
+  en or en.m (case sensitive) and excluded all others.
+  -Wikipedia namespaces: There are many special pages in Wikipedia that are not actual Wikipedia articles. I removed those pages. 
+  -I Filtered out all page titles that start with lowercase English characters. You may notice that some page titles don't start with English
+  letters but digits, symbols, lowercase characters in other languages, etc., DO NOT filter them.
+  -Miscellaneous filename extensions: Despite having already filtered pages in File: or Media: namespace, you may still get files instead of articles.
+  I filtered all disambiguation pages with the suffix _(disambiguation)(case insensitive), suffixes like _%28disambiguation%29 should have 
+  already been decoded at this point. Don't filter any page with a specific topic such as Numb_(Linkin_Park_song)
+  -Special pages: Finally, there are some special pages to exclude as well which have been excluded
+
